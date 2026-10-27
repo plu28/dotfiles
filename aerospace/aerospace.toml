@@ -1,0 +1,181 @@
+# i3 didn't have "normalizations" feature that why we disable them here.
+# But the feature is very helpful.
+# Normalizations eliminate all sorts of weird tree configurations that don't make sense.
+# Give normalizations a chance and enable them back.
+enable-normalization-flatten-containers = false
+enable-normalization-opposite-orientation-for-nested-containers = false
+
+# Commands to run after login
+after-login-command = []
+
+# Commands to run after startup
+# after-startup-command = [
+#   'exec-and-forget borders active_color=0xffe1e3e4 inactive_color=0xff494d64 width=5.0'
+# ]
+
+# Start aerospace at login
+start-at-login = true
+
+[mode.main.binding]
+ctrl-enter = 'exec-and-forget open -n /Applications/Ghostty.app'
+
+# cmd-h = 'focus left'
+# cmd-j = 'focus down'
+# cmd-k = 'focus up'
+# cmd-l = 'focus right'
+
+ctrl-h =         'focus --boundaries-action wrap-around-the-workspace left'
+# ctrl-j =   'focus --boundaries-action wrap-around-the-workspace down'
+# ctrl-k =         'focus --boundaries-action wrap-around-the-workspace up'
+ctrl-l = 'focus --boundaries-action wrap-around-the-workspace right'
+
+cmd-shift-h = 'move left'
+cmd-shift-j = 'move down'
+cmd-shift-k = 'move up'
+cmd-shift-l = 'move right'
+
+# Consider using 'join-with' command as a 'split' replacement if you want to enable normalizations
+# ctrl-h = 'split horizontal'
+ctrl-v = 'split vertical'
+
+ctrl-f = 'fullscreen'
+
+cmd-ctrl-q = 'close'
+
+# ctrl-s = 'layout v_accordion' # 'layout stacking' in i3
+# ctrl-w = 'layout h_accordion' # 'layout tabbed' in i3
+ctrl-e = 'layout tiles horizontal vertical' # 'layout toggle split' in i3 ( i do not like )
+
+ctrl-shift-space = 'layout floating tiling' # 'floating toggle' in i3
+
+# Not supported, because this command is redundant in AeroSpace mental model.
+# See: https://nikitabobko.github.io/AeroSpace/guide#floating-windows
+#ctrl-space = 'focus toggle_tiling_floating'
+
+# `focus parent`/`focus child` are not yet supported, and it's not clear whether they
+# should be supported at all https://github.com/nikitabobko/AeroSpace/issues/5
+# ctrl-a = 'focus parent'
+
+ctrl-1 = 'workspace 1'
+ctrl-2 = 'workspace 2'
+ctrl-3 = 'workspace 3'
+ctrl-4 = 'workspace 4'
+ctrl-5 = 'workspace 5'
+ctrl-6 = 'workspace 6'
+ctrl-7 = 'workspace 7'
+ctrl-8 = 'workspace 8'
+ctrl-9 = 'workspace 9'
+ctrl-0 = 'workspace 10'
+ctrl-alt-1 = 'workspace 6'
+ctrl-alt-2 = 'workspace 7'
+ctrl-alt-3 = 'workspace 8'
+ctrl-alt-4 = 'workspace 9'
+ctrl-alt-5 = 'workspace 10'
+#
+ctrl-cmd-1 = 'move-node-to-workspace 1'
+ctrl-cmd-2 = 'move-node-to-workspace 2'
+ctrl-cmd-3 = 'move-node-to-workspace 3'
+ctrl-cmd-4 = 'move-node-to-workspace 4'
+ctrl-cmd-5 = 'move-node-to-workspace 5'
+ctrl-cmd-6 = 'move-node-to-workspace 6'
+ctrl-cmd-7 = 'move-node-to-workspace 7'
+ctrl-cmd-8 = 'move-node-to-workspace 8'
+ctrl-cmd-9 = 'move-node-to-workspace 9'
+ctrl-cmd-0 = 'move-node-to-workspace 10'
+
+ctrl-cmd-c = 'reload-config'
+
+# interferes with neovim undo
+# ctrl-r = 'mode resize'
+
+ctrl-equal = 'workspace-back-and-forth'
+
+ctrl-cmd-right = 'move-node-to-monitor next'
+ctrl-cmd-left = 'move-node-to-monitor prev'
+
+# 'service' binding mode declaration.
+[mode.service.binding]
+esc = ['reload-config', 'mode main']
+r = ['flatten-workspace-tree', 'mode main'] # reset layout
+#s = ['layout sticky tiling', 'mode main'] # sticky is not yet supported https://github.com/nikitabobko/AeroSpace/issues/2
+f = [
+    'layout floating tiling',
+    'mode main',
+] # Toggle between floating and tiling layout
+backspace = ['close-all-windows-but-current', 'mode main']
+
+[mode.resize.binding]
+h = 'resize width -50'
+j = 'resize height +50'
+k = 'resize height -50'
+l = 'resize width +50'
+enter = 'mode main'
+esc = 'mode main'
+
+
+# attempt at multi monitor support
+[workspace-to-monitor-force-assignment]
+1 = 'main'
+3 = 'main'
+2 = 'secondary'
+4 = 'secondary'
+5 = 'secondary'
+6 = 'main'
+9 = 'secondary'
+
+# automatically switch apps to particular workspace
+[[on-window-detected]]
+	if.app-id = 'org.mozilla.com.zen.browser'
+	run = 'move-node-to-workspace 1'
+
+# [[on-window-detected]]
+# if.app-id = 'net.kovidgoyal.kitty'
+# run = 'move-node-to-workspace 3'
+
+# ghostty is the new hotness
+[[on-window-detected]]
+	if.app-id="com.mitchellh.ghostty"
+	run= [
+	  "layout tiling",
+	  "move-node-to-workspace 3"
+	]
+
+[[on-window-detected]]
+	if.app-id = 'com.hnc.Discord'
+	run = 'move-node-to-workspace 4'
+
+[[on-window-detected]]
+	if.app-id = 'com.spotify.client'
+	run = 'move-node-to-workspace 5'
+
+[[on-window-detected]]
+	if.app-id = 'com.openai.chat'
+	run = 'move-node-to-workspace 9'
+
+[[on-window-detected]]
+	if.app-id = 'com.TickTick.task.mac'
+	run = 'move-node-to-workspace 6'
+
+[[on-window-detected]]
+	if.app-id = 'com.apple.mail'
+	run = 'move-node-to-workspace 7'
+
+[[on-window-detected]]
+	if.app-id = 'com.microsoft.Outlook'
+	run = 'move-node-to-workspace 7'
+
+[[on-window-detected]]
+	if.app-id = 'com.apple.MobileSMS'
+	run = 'move-node-to-workspace 4'
+
+[[on-window-detected]]
+	if.app-id = 'com.apple.finder'
+	run = 'move-node-to-workspace 8'
+
+# [gaps]
+#     inner.horizontal = 0
+#     inner.vertical =   0
+#     outer.left =       5
+#     outer.bottom =     5
+#     outer.top =        5
+#     outer.right =      5

@@ -1,0 +1,112 @@
+#!/usr/bin/env sh
+
+set -eu
+
+state_dir="${XDG_STATE_HOME:-$HOME/.local/state}/tmux"
+session_name=""
+stack_file=""
+
+current_session() {
+    if [ -n "${TMUX:-}" ]; then
+        tmux display-message -p '#S'
+    else
+        printf 'default\n'
+    fi
+}
+
+session_stack_file() {
+    name="$1"
+    key="$(printf '%s' "$name" | cksum | awk '{ print $1 }')"
+    printf '%s/task-stack-%s' "$state_dir" "$key"
+}
+
+resolve_session() {
+    if [ -z "$session_name" ]; then
+        session_name="$(current_session)"
+    fi
+
+    stack_file="$(session_stack_file "$session_name")"
+}
+
+ensure_state() {
+    resolve_session
+    mkdir -p "$state_dir"
+    touch "$stack_file"
+}
+
+refresh_status() {
+    if [ -n "${TMUX:-}" ]; then
+        tmux refresh-client -S >/dev/null 2>&1 || true
+    fi
+}
+
+announce() {
+    if [ -n "${TMUX:-}" ]; then
+        tmux display-message "$1"
+    else
+        printf '%s\n' "$1"
+    fi
+}
+
+top_task() {
+    ensure_state
+    awk 'NF { task = $0 } END { print task }' "$stack_file"
+}
+
+push_task() {
+    task="$1"
+    ensure_state
+
+    if [ -n "$task" ]; then
+        printf '%s\n' "$task" >> "$stack_file"
+        refresh_status
+    fi
+}
+
+pop_task() {
+    ensure_state
+    current="$(top_task)"
+
+    if [ -z "$current" ]; then
+        return 0
+    fi
+
+    tmp_file="${stack_file}.$$"
+    awk 'NF { lines[++count] = $0 } END { for (i = 1; i < count; i++) print lines[i] }' "$stack_file" > "$tmp_file"
+    mv "$tmp_file" "$stack_file"
+
+    next="$(top_task)"
+    refresh_status
+}
+
+if [ "${1:-}" = "--session" ]; then
+    session_name="$2"
+    shift 2
+fi
+
+case "${1:-top}" in
+    push)
+        shift
+        push_task "$*"
+        ;;
+    pop)
+        pop_task
+        ;;
+    top)
+        top_task
+        ;;
+    list)
+        ensure_state
+        awk 'NF { print }' "$stack_file"
+        ;;
+    clear)
+        ensure_state
+        : > "$stack_file"
+        refresh_status
+        announce 'Task stack cleared'
+        ;;
+    *)
+        printf 'Usage: %s [--session NAME] [push TASK|pop|top|list|clear]\n' "$0" >&2
+        exit 2
+        ;;
+esac
